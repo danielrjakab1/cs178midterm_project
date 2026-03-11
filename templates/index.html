@@ -1,0 +1,117 @@
+<html>
+<head>
+    <title>Student Placement Analytics</title>
+    <link href="static/css/nouislider.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="static/css/style.css" media="screen" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="static/js/nouislider.min.js"></script>
+    <script src="static/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+
+    <div id="controls-bar">
+      <label>X:
+        <select id="x-select" onchange="on_axis_change()">
+          {% for col in axis_options %}
+            <option value="{{col}}" {% if col == default_x %}selected{% endif %}>{{col}}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label style="margin-left:20px">Y:
+        <select id="y-select" onchange="on_axis_change()">
+          {% for col in axis_options %}
+            <option value="{{col}}" {% if col == default_y %}selected{% endif %}>{{col}}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <div id="main-layout">
+
+      <div id="plots-area">
+        {% for fval in facet_values %}
+          <div class="facet-panel">
+            <h3>PlacementStatus: {{fval}}</h3>
+            <div id="scatter-{{fval}}"></div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div id="filter-panel">
+
+        <h3>Filters</h3>
+        {% for column, (min, max) in filter_ranges.items() %}
+          <div class="slider-group">
+            <label>{{column}}</label>
+            <div class="slider-row">
+              <span class="slider-min-label">{{min}}</span>
+              <div id="{{column}}-slider" class="slider"></div>
+              <span class="slider-max-label">{{max}}</span>
+            </div>
+          </div>
+        {% endfor %}
+
+        <div class="checkbox-group">
+          <h4>ExtracurricularActivities</h4>
+          <label><input type="checkbox" class="cb-ExtracurricularActivities" value="true" checked onchange="update()"> Yes</label>
+          <label><input type="checkbox" class="cb-ExtracurricularActivities" value="false" checked onchange="update()"> No</label>
+        </div>
+
+        <div class="checkbox-group">
+          <h4>PlacementTraining</h4>
+          <label><input type="checkbox" class="cb-PlacementTraining" value="true" checked onchange="update()"> Yes</label>
+          <label><input type="checkbox" class="cb-PlacementTraining" value="false" checked onchange="update()"> No</label>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+
+<script>
+  const margin = {top: 40, right: 20, bottom: 40, left: 50};
+  const width  = 380 - margin.left - margin.right;
+  const height = 340 - margin.top  - margin.bottom;
+
+  const scatter_ranges = {
+    x: {{scatter_ranges.x | tojson | safe}},
+    y: {{scatter_ranges.y | tojson | safe}}
+  };
+  const filter_ranges = {{filter_ranges | tojson | safe}};
+  const facet_values  = {{facet_values  | tojson | safe}};
+
+  const svgs   = {};
+  const scales = {};
+
+  facet_values.forEach(fval => {
+    const svg = d3.select(`#scatter-${fval}`)
+      .append('svg')
+      .attr('width',  width  + margin.left + margin.right)
+      .attr('height', height + margin.top  + margin.bottom)
+      .style('background-color', '#dbdad7')
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+    svgs[fval] = svg;
+
+    scales[fval] = build_scales(scatter_ranges.x, scatter_ranges.y);
+    draw_axes(svg, scales[fval], fval);
+  });
+
+  Object.entries(filter_ranges).forEach(([col, [min, max]]) => {
+    const el = document.getElementById(`${col}-slider`);
+    noUiSlider.create(el, {
+      start: [min, max],
+      connect: true,
+      tooltips: true,
+      step: col === 'SoftSkillsRating' ? 0.1 : 1,
+      range: {min: min, max: max}
+    });
+    el.noUiSlider.on('change', () => update());
+  });
+
+  update();
+</script>
+</html>
