@@ -1,0 +1,44 @@
+body {
+	font-family: sans-serif;
+	font-size: 10pt;
+}
+
+text {
+	font-family: sans-serif;
+	font-size: 10pt;
+}
+input {
+	vertical-align: middle;
+}
+.noUi-tooltip {
+	display: none;
+}
+.noUi-active .noUi-tooltip {
+	display: block;
+}
+.container
+{
+	text-align:center;
+	padding-left: 20px;
+}
+.sliderHumidity
+{
+  text-align:center;
+}
+.tooltip {
+  position: absolute;
+  font-size: 12px;
+  width:  auto;
+  height: auto;
+  pointer-events: none;
+  background-color: white;
+}
+.axis {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
