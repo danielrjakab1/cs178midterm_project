@@ -39,7 +39,7 @@ function draw_regression_line(svg, scale, slope, intercept, i, color){
 }
  
 function draw_scatter(i, svg, scale, points, slope, intercept){
-    var palette = ['#3b82f6', '#f97316'];
+    var palette = ['#ff004c', '#1d16f9'];
     var color = palette[i % palette.length];
     svg.selectAll('circle').remove();
     svg.selectAll('circle')
