@@ -26,15 +26,23 @@
           {% endfor %}
         </select>
       </label>
+
+      <label style="margin-left:20px">Facet:
+        <select id="facet-select" onchange="on_facet_change()">
+          {% for col in facet_options %}
+            <option value="{{col}}" {% if col == default_facet %}selected{% endif %}>{{col}}</option>
+          {% endfor %}
+        </select>
+      </label>
     </div>
 
     <div id="main-layout">
 
       <div id="plots-area">
-        {% for fval in facet_values %}
+        {% for fval in facet_values_map[default_facet] %}
           <div class="facet-panel">
-            <h3>PlacementStatus: {{fval}}</h3>
-            <div id="scatter-{{fval}}"></div>
+            <h3 id="facet-label-{{loop.index0}}">{{default_facet}}: {{fval}}</h3>
+            <div id="scatter-{{loop.index0}}"></div>
           </div>
         {% endfor %}
       </div>
@@ -76,28 +84,27 @@
   const width  = 380 - margin.left - margin.right;
   const height = 340 - margin.top  - margin.bottom;
 
-  const scatter_ranges = {
+  const scatter_ranges  = {
     x: {{scatter_ranges.x | tojson | safe}},
     y: {{scatter_ranges.y | tojson | safe}}
   };
-  const filter_ranges = {{filter_ranges | tojson | safe}};
-  const facet_values  = {{facet_values  | tojson | safe}};
+  const filter_ranges   = {{filter_ranges    | tojson | safe}};
+  const facet_values_map = {{facet_values_map | tojson | safe}};
 
-  const svgs   = {};
-  const scales = {};
+  const svgs   = {0: null, 1: null};
+  const scales = {0: null, 1: null};
 
-  facet_values.forEach(fval => {
-    const svg = d3.select(`#scatter-${fval}`)
+  [0, 1].forEach(i => {
+    const svg = d3.select(`#scatter-${i}`)
       .append('svg')
       .attr('width',  width  + margin.left + margin.right)
       .attr('height', height + margin.top  + margin.bottom)
       .style('background-color', '#dbdad7')
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
-    svgs[fval] = svg;
-
-    scales[fval] = build_scales(scatter_ranges.x, scatter_ranges.y);
-    draw_axes(svg, scales[fval], fval);
+    svgs[i] = svg;
+    scales[i] = build_scales(scatter_ranges.x, scatter_ranges.y);
+    draw_axes(svg, scales[i], i);
   });
 
   Object.entries(filter_ranges).forEach(([col, [min, max]]) => {
@@ -111,6 +118,10 @@
     });
     el.noUiSlider.on('change', () => update());
   });
+
+  function on_facet_change() {
+    update();
+  }
 
   update();
 </script>
